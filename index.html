@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI CV Shortlisting & Ranking Tool</title>
+
+  <!-- PDF and DOCX parsing libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.2/mammoth.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --primary: #2457ff;
+      --primary-dark: #1b43c8;
+      --green: #0f9f6e;
+      --amber: #b7791f;
+      --red: #c2410c;
+      --border: #e5e7eb;
+      --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(36, 87, 255, 0.12), transparent 35%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      padding: 44px 20px 26px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid rgba(36,87,255,0.18);
+      color: var(--primary-dark);
+      border-radius: 999px;
+      background: rgba(36,87,255,0.07);
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(32px, 5vw, 56px);
+      line-height: 1.05;
+      letter-spacing: -1.8px;
+    }
+
+    .subtitle {
+      max-width: 850px;
+      margin: 16px auto 0;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto 60px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: rgba(255,255,255,0.94);
+      border: 1px solid rgba(229,231,235,0.9);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+    }
+
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 20px;
+      letter-spacing: -0.3px;
+    }
+
+    .hint {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 16px 0 7px;
+      color: #344054;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font: inherit;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(36,87,255,0.5);
+      box-shadow: 0 0 0 4px rgba(36,87,255,0.08);
+    }
+
+    input[type="file"] {
+      padding: 11px;
+      cursor: pointer;
+      background: #fbfcff;
+    }
+
+    textarea {
+      min-height: 126px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 650px) {
+      .row { grid-template-columns: 1fr; }
+    }
+
+    .checkrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .checkrow input {
+      width: auto;
+    }
+
+    .btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      font: inherit;
+      transition: 0.15s ease;
+    }
+
+    .primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .primary:hover { background: var(--primary-dark); }
+
+    .secondary {
+      color: var(--text);
+      background: #eef2ff;
+    }
+
+    .secondary:hover { background: #e0e7ff; }
+
+    .danger {
+      color: #9a3412;
+      background: #fff7ed;
+    }
+
+    .status {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .metric {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .metric b {
+      display: block;
+      font-size: 24px;
+      margin-top: 4px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .results {
+      margin-top: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .candidate {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      background: white;
+    }
+
+    .candidate-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 8px;
+    }
+
+    .candidate h3 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .file-name {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+    }
+
+    .score {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      text-align: right;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      margin-top: 4px;
+    }
+
+    .SHORTLIST { color: #05603a; background: #d1fadf; }
+    .MAYBE { color: #93370d; background: #fef0c7; }
+    .REJECT { color: #9a3412; background: #ffedd5; }
+
+    details {
+      margin-top: 12px;
+      border-top: 1px dashed var(--border);
+      padding-top: 10px;
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--primary-dark);
+      font-weight: 800;
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 750px) {
+      .score-grid { grid-template-columns: 1fr; }
+    }
+
+    .score-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .score-box strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .small-list {
+      margin: 8px 0 0 18px;
+      padding: 0;
+      color: #344054;
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 16px;
+      margin-top: 12px;
+      background: white;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: 11px 10px;
+      text-align: left;
+      font-size: 13px;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f8fafc;
+      color: #344054;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .note {
+      background: #fffbeb;
+      color: #7c2d12;
+      border: 1px solid #fde68a;
+      border-radius: 16px;
+      padding: 12px 14px;
+      line-height: 1.5;
+      font-size: 13px;
+      margin-top: 14px;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      padding: 26px 16px 40px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="badge">AI Personal Project • Recruiter-in-the-loop CV Ranking</div>
+    <h1>AI CV Shortlisting & Ranking Tool</h1>
+    <p class="subtitle">
+      Upload one job description and multiple CVs. The tool extracts text, evaluates each candidate against the role, ranks them, and produces evidence-based recruiter notes.
+    </p>
+  </header>
+
+  <main>
+    <div class="grid">
+      <section class="card">
+        <h2>1. Credentials & Model</h2>
+        <p class="hint">For a public GitHub Pages demo, do not hardcode your API key. Enter it only at runtime. For production, move the API call to a backend/serverless function.</p>
+
+        <label for="apiKey">OpenAI API Key</label>
+        <input id="apiKey" type="password" placeholder="sk-..." autocomplete="off"/>
+
+        <div class="row">
+          <div>
+            <label for="model">Model</label>
+            <select id="model">
+              <option value="gpt-5.4-mini" selected>gpt-5.4-mini</option>
+              <option value="gpt-5.4">gpt-5.4</option>
+              <option value="gpt-5.5">gpt-5.5</option>
+              <option value="gpt-4.1-mini">gpt-4.1-mini</option>
+            </select>
+          </div>
+          <div>
+            <label for="temperature">Temperature</label>
+            <select id="temperature">
+              <option value="0" selected>0 - consistent scoring</option>
+              <option value="0.2">0.2</option>
+              <option value="0.4">0.4</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="checkrow">
+          <input id="rememberKey" type="checkbox"/>
+          <span>Remember key in this browser session only</span>
+        </div>
+
+        <div class="note">
+          Privacy note: CVs and JDs may contain personal data. Use test/sample CVs for your GitHub demo. Do not upload real candidate data unless you have permission and a proper privacy basis.
+        </div>
+
+        <h2 style="margin-top:24px;">2. Upload Role & CVs</h2>
+        <p class="hint">Accepted formats: PDF, DOCX and TXT. Upload one JD and as many CVs as required.</p>
+
+        <label for="jobTitle">Role Title</label>
+        <input id="jobTitle" type="text" placeholder="Example: HR Analyst, Reward Analyst, Data Analyst"/>
+
+        <label for="jdFile">Single Job Description</label>
+        <input id="jdFile" type="file" accept=".pdf,.docx,.txt"/>
+
+        <label for="jdText">Or paste job description text</label>
+        <textarea id="jdText" placeholder="Paste the job description here if you do not want to upload a file..."></textarea>
+
+        <label for="cvFiles">Multiple CVs / Resumes</label>
+        <input id="cvFiles" type="file" multiple accept=".pdf,.docx,.txt"/>
+
+        <div class="btns">
+          <button class="primary" onclick="runAnalysis()">Analyse & Rank Candidates</button>
+          <button class="secondary" onclick="downloadCSV()">Export CSV</button>
+          <button class="secondary" onclick="downloadJSON()">Export JSON</button>
+          <button class="danger" onclick="clearAll()">Clear</button>
+        </div>
+
+        <div id="status" class="status"></div>
+      </section>
+
+      <aside class="card">
+        <h2>Scoring Rubric</h2>
+        <p class="hint">The default rubric is generalised so it works across HR, rewards, operations, tech, finance, and business roles.</p>
+
+        <table>
+          <thead>
+            <tr><th>Criterion</th><th>Weight</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Skills Match</td><td>30%</td></tr>
+            <tr><td>Relevant Experience</td><td>25%</td></tr>
+            <tr><td>Education & Certifications</td><td>15%</td></tr>
+            <tr><td>Role Alignment</td><td>15%</td></tr>
+            <tr><td>Ownership & Impact</td><td>15%</td></tr>
+          </tbody>
+        </table>
+
+        <div class="metrics">
+          <div class="metric"><span>Shortlist</span><b id="mShort">0</b></div>
+          <div class="metric"><span>Maybe</span><b id="mMaybe">0</b></div>
+          <div class="metric"><span>Reject</span><b id="mReject">0</b></div>
+        </div>
+
+        <div class="note">
+          Decision logic: score ≥ 7.0 = Shortlist, 4.0–6.9 = Maybe, below 4.0 = Reject. Final hiring decisions should always be made by a human reviewer.
+        </div>
+      </aside>
+    </div>
+
+    <section class="card" style="margin-top:18px;">
+      <h2>Ranked Results</h2>
+      <p class="hint">Candidates will appear below from highest to lowest score.</p>
+      <div id="results" class="results"></div>
+    </section>
+  </main>
+
+  <footer>
+    Built as a general-purpose AI recruitment screening demo. Human review required.
+  </footer>
+
+<script>
+  let allResults = [];
+
+  if (window.pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+  }
+
+  const schema = {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      candidate_name: { type: "string" },
+      target_role: { type: "string" },
+      overall_score: { type: "number" },
+      decision: { type: "string", enum: ["SHORTLIST", "MAYBE", "REJECT"] },
+      scores: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          skills_match: scoreObj(),
+          relevant_experience: scoreObj(),
+          education_certifications: scoreObj(),
+          role_alignment: scoreObj(),
+          ownership_impact: scoreObj()
+        },
+        required: ["skills_match", "relevant_experience", "education_certifications", "role_alignment", "ownership_impact"]
+      },
+      key_strengths: { type: "array", items: { type: "string" } },
+      red_flags: { type: "array", items: { type: "string" } },
+      missing_requirements: { type: "array", items: { type: "string" } },
+      summary: { type: "string" },
+      confidence_level: { type: "string", enum: ["HIGH", "MEDIUM", "LOW"] }
+    },
+    required: [
+      "candidate_name", "target_role", "overall_score", "decision", "scores",
+      "key_strengths", "red_flags", "missing_requirements", "summary", "confidence_level"
+    ]
+  };
+
+  function scoreObj() {
+    return {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        score: { type: "number" },
+        weight: { type: "number" },
+        justification: { type: "string" },
+        evidence: { type: "string" }
+      },
+      required: ["score", "weight", "justification", "evidence"]
+    };
+  }
+
+  function setStatus(message) {
+    document.getElementById("status").textContent = message;
+  }
+
+  async function readFileAsText(file) {
+    const ext = file.name.split(".").pop().toLowerCase();
+
+    if (ext === "txt") {
+      return await file.text();
+    }
+
+    if (ext === "pdf") {
+      const buffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      let text = "";
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        text += content.items.map(item => item.str).join(" ") + "\n";
+      }
+      return cleanText(text);
+    }
+
+    if (ext === "docx") {
+      const buffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+      return cleanText(result.value);
+    }
+
+    throw new Error(`Unsupported file format: ${file.name}`);
+  }
+
+  function cleanText(text) {
+    return (text || "")
+      .replace(/\s+/g, " ")
+      .replace(/[^\S\r\n]+/g, " ")
+      .trim();
+  }
+
+  function buildPrompt({ jobTitle, jdText, cvText, fileName }) {
+    return `
+You are an expert recruiter and talent screening assistant.
+
+Evaluate the candidate CV against the uploaded job description.
+This is a general-purpose screening tool and must not reference any specific company unless the JD itself names that company.
+
+ROLE TITLE:
+${jobTitle || "Not provided"}
+
+JOB DESCRIPTION:
+${jdText}
+
+CANDIDATE CV FILE:
+${fileName}
+
+CANDIDATE CV TEXT:
+${cvText}
+
+SCORING RUBRIC:
+Evaluate exactly 5 dimensions, each scored from 0 to 10.
+
+1. Skills Match, weight 0.30
+How closely the candidate's stated skills match the required and preferred skills in the JD.
+
+2. Relevant Experience, weight 0.25
+How directly the candidate's work/projects match the role responsibilities, including years and depth of experience where stated.
+
+3. Education & Certifications, weight 0.15
+Relevance of degree, qualifications, training, certifications, or professional learning.
+
+4. Role Alignment, weight 0.15
+Fit with the role level, function, industry/domain, tools, and working style described in the JD.
+
+5. Ownership & Impact, weight 0.15
+Evidence of measurable outcomes, initiative, leadership, process improvement, delivery ownership, or business impact.
+
+STRICT RULES:
+- Base all scoring only on evidence explicitly found in the CV and JD.
+- Do not invent experience, qualifications, tools, employers, or achievements.
+- Quote or closely paraphrase evidence from the CV in the evidence field.
+- If evidence is missing, score conservatively and explain what is missing.
+- Calculate overall_score using:
+  skills_match*0.30 + relevant_experience*0.25 + education_certifications*0.15 + role_alignment*0.15 + ownership_impact*0.15
+- Round overall_score to one decimal.
+- Decision logic:
+  overall_score >= 7.0 = SHORTLIST
+  4.0 <= overall_score < 7.0 = MAYBE
+  overall_score < 4.0 = REJECT
+- Return only valid JSON matching the schema.
+`;
+  }
+
+  async function callOpenAI({ apiKey, model, temperature, prompt }) {
+    const response = await fetch("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model,
+        input: [
+          {
+            role: "system",
+            content: "You are a precise, evidence-based recruitment screening assistant. You return strict JSON only."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: Number(temperature),
+        text: {
+          format: {
+            type: "json_schema",
+            name: "cv_shortlisting_result",
+            strict: true,
+            schema
+          }
+        }
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data?.error?.message || "OpenAI API request failed.");
+    }
+
+    const outputText =
+      data.output_text ||
+      data.output?.flatMap(o => o.content || []).find(c => c.type === "output_text" || c.text)?.text;
+
+    if (!outputText) {
+      throw new Error("No text output returned by the model.");
+    }
+
+    return JSON.parse(outputText);
+  }
+
+  async function runAnalysis() {
+    try {
+      const apiKey = document.getElementById("apiKey").value.trim();
+      const rememberKey = document.getElementById("rememberKey").checked;
+      const model = document.getElementById("model").value;
+      const temperature = document.getElementById("temperature").value;
+      const jobTitle = document.getElementById("jobTitle").value.trim();
+      const jdFile = document.getElementById("jdFile").files[0];
+      const pastedJD = document.getElementById("jdText").value.trim();
+      const cvFiles = Array.from(document.getElementById("cvFiles").files);
+
+      if (!apiKey) throw new Error("Please enter your OpenAI API key.");
+      if (!jdFile && !pastedJD) throw new Error("Please upload or paste one job description.");
+      if (!cvFiles.length) throw new Error("Please upload at least one CV.");
+
+      if (rememberKey) {
+        sessionStorage.setItem("OPENAI_API_KEY", apiKey);
+      } else {
+        sessionStorage.removeItem("OPENAI_API_KEY");
+      }
+
+      setStatus("Reading job description...");
+      let jdText = pastedJD;
+      if (jdFile) {
+        jdText = cleanText(await readFileAsText(jdFile));
+      }
+
+      allResults = [];
+      renderResults();
+
+      for (let i = 0; i < cvFiles.length; i++) {
+        const file = cvFiles[i];
+        setStatus(`Processing ${i + 1}/${cvFiles.length}: ${file.name}\nExtracting CV text...`);
+        const cvText = await readFileAsText(file);
+
+        const prompt = buildPrompt({ jobTitle, jdText, cvText, fileName: file.name });
+
+        setStatus(`Processing ${i + 1}/${cvFiles.length}: ${file.name}\nSending to AI for evaluation...`);
+        const result = await callOpenAI({ apiKey, model, temperature, prompt });
+        result.file_name = file.name;
+
+        allResults.push(result);
+        allResults.sort((a, b) => Number(b.overall_score || 0) - Number(a.overall_score || 0));
+        renderResults();
+      }
+
+      setStatus(`Done. Analysed ${allResults.length} CV(s).`);
+    } catch (err) {
+      setStatus(`Error: ${err.message}`);
+      console.error(err);
+    }
+  }
+
+  function renderResults() {
+    const container = document.getElementById("results");
+    container.innerHTML = "";
+
+    const counts = { SHORTLIST: 0, MAYBE: 0, REJECT: 0 };
+    allResults.forEach(r => counts[r.decision] = (counts[r.decision] || 0) + 1);
+
+    document.getElementById("mShort").textContent = counts.SHORTLIST || 0;
+    document.getElementById("mMaybe").textContent = counts.MAYBE || 0;
+    document.getElementById("mReject").textContent = counts.REJECT || 0;
+
+    if (!allResults.length) {
+      container.innerHTML = `<p class="hint">No results yet. Upload a JD and CVs, then click Analyse & Rank Candidates.</p>`;
+      return;
+    }
+
+    allResults.forEach((r, idx) => {
+      const scores = r.scores || {};
+      const card = document.createElement("div");
+      card.className = "candidate";
+      card.innerHTML = `
+        <div class="candidate-head">
+          <div>
+            <h3>#${idx + 1} ${escapeHtml(r.candidate_name || "Unknown Candidate")}</h3>
+            <div class="file-name">${escapeHtml(r.file_name || "")}</div>
+            <span class="pill ${r.decision}">${r.decision}</span>
+          </div>
+          <div>
+            <div class="score">${Number(r.overall_score || 0).toFixed(1)}</div>
+            <div class="file-name">Overall score</div>
+          </div>
+        </div>
+
+        <p>${escapeHtml(r.summary || "")}</p>
+
+        <ul class="small-list">
+          ${(r.key_strengths || []).slice(0, 3).map(x => `<li><strong>Strength:</strong> ${escapeHtml(x)}</li>`).join("")}
+          ${(r.missing_requirements || []).slice(0, 3).map(x => `<li><strong>Missing:</strong> ${escapeHtml(x)}</li>`).join("")}
+        </ul>
+
+        <details>
+          <summary>View detailed scoring and evidence</summary>
+          <div class="score-grid">
+            ${scoreBox("Skills Match", scores.skills_match)}
+            ${scoreBox("Relevant Experience", scores.relevant_experience)}
+            ${scoreBox("Education & Certifications", scores.education_certifications)}
+            ${scoreBox("Role Alignment", scores.role_alignment)}
+            ${scoreBox("Ownership & Impact", scores.ownership_impact)}
+          </div>
+          <p class="hint" style="margin-top:12px;"><strong>Red flags:</strong> ${(r.red_flags || ["None identified"]).map(escapeHtml).join("; ")}</p>
+          <p class="hint"><strong>Confidence:</strong> ${escapeHtml(r.confidence_level || "MEDIUM")}</p>
+        </details>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function scoreBox(title, obj = {}) {
+    return `
+      <div class="score-box">
+        <strong>${title}: ${obj.score ?? "N/A"}/10</strong>
+        <div>${escapeHtml(obj.justification || "")}</div>
+        <div style="margin-top:6px;color:#667085;"><em>Evidence:</em> ${escapeHtml(obj.evidence || "No direct evidence provided.")}</div>
+      </div>
+    `;
+  }
+
+  function escapeHtml(str) {
+    return String(str ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function downloadJSON() {
+    if (!allResults.length) return alert("No results to export.");
+    const blob = new Blob([JSON.stringify(allResults, null, 2)], { type: "application/json" });
+    triggerDownload(blob, "cv-ranking-results.json");
+  }
+
+  function downloadCSV() {
+    if (!allResults.length) return alert("No results to export.");
+    const rows = [
+      ["Rank", "Candidate Name", "File Name", "Overall Score", "Decision", "Confidence", "Summary"]
+    ];
+
+    allResults.forEach((r, i) => {
+      rows.push([
+        i + 1,
+        r.candidate_name || "",
+        r.file_name || "",
+        r.overall_score || "",
+        r.decision || "",
+        r.confidence_level || "",
+        r.summary || ""
+      ]);
+    });
+
+    const csv = rows.map(row => row.map(cell => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    triggerDownload(blob, "cv-ranking-results.csv");
+  }
+
+  function triggerDownload(blob, fileName) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function clearAll() {
+    allResults = [];
+    document.getElementById("jdFile").value = "";
+    document.getElementById("jdText").value = "";
+    document.getElementById("cvFiles").value = "";
+    document.getElementById("jobTitle").value = "";
+    setStatus("");
+    renderResults();
+  }
+
+  window.addEventListener("load", () => {
+    const savedKey = sessionStorage.getItem("OPENAI_API_KEY");
+    if (savedKey) {
+      document.getElementById("apiKey").value = savedKey;
+      document.getElementById("rememberKey").checked = true;
+    }
+    renderResults();
+  });
+</script>
+</body>
+</html>
