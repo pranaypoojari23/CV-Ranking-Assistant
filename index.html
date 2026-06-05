@@ -445,6 +445,7 @@
 
         <div class="btns">
           <button class="primary" onclick="runAnalysis()">Analyse & Rank Candidates</button>
+          <button class="secondary" onclick="loadRewardAnalystDemo()">Load Reward Analyst Demo</button>
           <button class="secondary" onclick="downloadCSV()">Export CSV</button>
           <button class="secondary" onclick="downloadJSON()">Export JSON</button>
           <button class="danger" onclick="clearAll()">Clear</button>
@@ -495,6 +496,284 @@
 
 <script>
   let allResults = [];
+
+
+  const rewardAnalystDemoResults = [
+    {
+      candidate_name: "Pranay Prakash Poojari",
+      target_role: "Global Compensation and Benefits Specialist / Reward Analyst",
+      overall_score: 8.7,
+      decision: "SHORTLIST",
+      file_name: "PRANAY_PRAKASH_POOJARI_- HR.pdf",
+      scores: {
+        skills_match: {
+          score: 9,
+          weight: 0.30,
+          justification: "Excellent match for compensation, benefits, salary benchmarking, job architecture, HRIS and data-led rewards work. The CV directly mentions Salary.com, Aon Human Capital, Workday, compensation grades, salary bands and benefits renewals.",
+          evidence: "'Analyzed salary data using Salary.com and Aon Human Capital'; 'mapping compensation grades, and validating salary band structures'; 'Led benefit renewals'."
+        },
+        relevant_experience: {
+          score: 9,
+          weight: 0.25,
+          justification: "Strong relevant C&B experience within the required 2-5 year range, with global exposure and ownership across compensation, benefits, policy harmonisation and HR operations.",
+          evidence: "'Junior Reward Specialist, YouGov, Mumbai, India August 2023 - August 2025'; 'managing vendor relationships across 33+ countries'."
+        },
+        education_certifications: {
+          score: 8,
+          weight: 0.15,
+          justification: "Relevant academic background with an MSc in HRM and reward-focused modules. Certifications also show HR analytics and AI learning orientation.",
+          evidence: "'Master's in Human Resource Management'; 'Reward & Performance Management, Data Analytics for HRM'; 'Using Metrics to Drive HR Strategy'."
+        },
+        role_alignment: {
+          score: 9,
+          weight: 0.15,
+          justification: "Very strong alignment with global C&B responsibilities including compensation cycles, salary planning support, benefits programmes, HRIS and vendor relationships.",
+          evidence: "'Built a full job architecture framework for over 1,900 employees'; 'Executed post-acquisition benefits integration and policy harmonization'."
+        },
+        ownership_impact: {
+          score: 8,
+          weight: 0.15,
+          justification: "Clear evidence of project ownership, measurable scale and process improvements, including job architecture, benefits integration and payroll/HR operations workflows.",
+          evidence: "'for over 1,900 employees'; 'improving compliance and consistency across 3,000+ employees'; 'optimizing workflows to increase efficiency'."
+        }
+      },
+      key_strengths: [
+        "Direct compensation and benefits experience across global markets",
+        "Strong job architecture, salary benchmarking and Workday exposure",
+        "Good mix of rewards, HR operations, vendor management and analytics"
+      ],
+      red_flags: [
+        "Primary experience is India-based; role location is Bangalore so this is not a blocker",
+        "Commodity industry exposure is not explicitly mentioned"
+      ],
+      missing_requirements: [
+        "No explicit commodities industry experience mentioned",
+        "No direct mention of bonus planning ownership, though compensation cycle exposure is implied through rewards work"
+      ],
+      summary: "Highly relevant candidate for a Reward Analyst / Global Compensation and Benefits Specialist role. The CV shows hands-on experience in compensation benchmarking, job architecture, benefits renewals, HRIS and policy harmonisation. Strong shortlist profile because the candidate has worked on several responsibilities directly matching the JD.",
+      confidence_level: "HIGH"
+    },
+    {
+      candidate_name: "Aisha Menon",
+      target_role: "Global Compensation and Benefits Specialist / Reward Analyst",
+      overall_score: 7.6,
+      decision: "SHORTLIST",
+      file_name: "Aisha_Menon_CV_Demo.pdf",
+      scores: {
+        skills_match: {
+          score: 8,
+          weight: 0.30,
+          justification: "Strong match on compensation analysis, annual salary review, benefits administration and HRIS reporting. Some vendor management is present but less global than the JD requires.",
+          evidence: "Demo CV states: 'supported annual compensation review', 'prepared salary increase files', 'managed health insurance enrolment', and 'created HRIS reports'."
+        },
+        relevant_experience: {
+          score: 8,
+          weight: 0.25,
+          justification: "Relevant 3 years of HR rewards and operations experience, which fits the 2-5 year requirement. Experience is mostly regional rather than global.",
+          evidence: "Demo CV states: '3 years in HR operations and rewards support' and 'supported India and UAE employee benefit processes'."
+        },
+        education_certifications: {
+          score: 7,
+          weight: 0.15,
+          justification: "Relevant business and HR education with an HR analytics certification. No advanced reward-specific certification mentioned.",
+          evidence: "Demo CV states: 'BBA Human Resources' and 'HR Analytics Certificate'."
+        },
+        role_alignment: {
+          score: 8,
+          weight: 0.15,
+          justification: "Good alignment with the role's operational C&B processes, especially salary reviews, benefits queries and employee communication.",
+          evidence: "Demo CV states: 'handled employee benefits queries' and 'supported annual salary review communications'."
+        },
+        ownership_impact: {
+          score: 6,
+          weight: 0.15,
+          justification: "Some process improvement evidence, but limited quantified business impact or independent ownership of strategic projects.",
+          evidence: "Demo CV states: 'reduced benefits query turnaround time by 20%' but does not show large-scale ownership."
+        }
+      },
+      key_strengths: [
+        "Relevant compensation review and benefits administration experience",
+        "Good HRIS and reporting exposure",
+        "Fits the 2-5 year experience range"
+      ],
+      red_flags: [
+        "Limited evidence of global C&B programme ownership",
+        "No clear external benchmarking tool exposure mentioned"
+      ],
+      missing_requirements: [
+        "No explicit salary benchmarking platform experience",
+        "Limited evidence of strategic project participation"
+      ],
+      summary: "Aisha is a strong operational C&B candidate with relevant experience in salary review support, benefits administration and HRIS reporting. She is suitable for shortlisting, especially if the role needs someone who can execute C&B processes accurately. The main gap is limited evidence of global programme ownership.",
+      confidence_level: "MEDIUM"
+    },
+    {
+      candidate_name: "Rohan Desai",
+      target_role: "Global Compensation and Benefits Specialist / Reward Analyst",
+      overall_score: 6.3,
+      decision: "MAYBE",
+      file_name: "Rohan_Desai_CV_Demo.pdf",
+      scores: {
+        skills_match: {
+          score: 6,
+          weight: 0.30,
+          justification: "Moderate skills match. The candidate has HR data, payroll coordination and Excel reporting experience, but limited direct compensation and benefits design exposure.",
+          evidence: "Demo CV states: 'prepared payroll variance reports', 'maintained HR dashboards', and 'supported employee data audits'."
+        },
+        relevant_experience: {
+          score: 6,
+          weight: 0.25,
+          justification: "The candidate has 4 years of HR operations experience, but much of it is payroll and HR administration rather than dedicated C&B.",
+          evidence: "Demo CV states: '4 years HR Operations Executive' and 'coordinated payroll inputs for 800 employees'."
+        },
+        education_certifications: {
+          score: 7,
+          weight: 0.15,
+          justification: "Relevant HR degree and strong Excel certification, but no reward or compensation-specific training mentioned.",
+          evidence: "Demo CV states: 'MBA HR' and 'Advanced Excel Certification'."
+        },
+        role_alignment: {
+          score: 6,
+          weight: 0.15,
+          justification: "Partial alignment due to HR data, payroll and process experience. Less alignment with market benchmarking, benefits programme development and vendor management.",
+          evidence: "Demo CV states: 'supported HR reporting and payroll governance' but does not mention benefits renewals or salary benchmarking."
+        },
+        ownership_impact: {
+          score: 6,
+          weight: 0.15,
+          justification: "Some measurable process improvement, but impact is more HR operations focused than reward strategy focused.",
+          evidence: "Demo CV states: 'improved payroll input accuracy by 18%' and 'created monthly HR dashboard'."
+        }
+      },
+      key_strengths: [
+        "Strong HR operations and payroll reporting base",
+        "Good Excel and dashboarding exposure",
+        "Could grow into a C&B analyst role"
+      ],
+      red_flags: [
+        "Limited direct compensation and benefits programme experience",
+        "No vendor or consultant management evidence"
+      ],
+      missing_requirements: [
+        "No direct global C&B role experience",
+        "No compensation benchmarking tool exposure",
+        "No benefits programme design or renewal ownership"
+      ],
+      summary: "Rohan is a maybe candidate. He has useful HR data and payroll experience, but the CV does not show enough direct compensation and benefits ownership for a strong shortlist decision. He could be considered if the hiring manager is open to a strong HR operations profile transitioning into C&B.",
+      confidence_level: "MEDIUM"
+    },
+    {
+      candidate_name: "Meera Kapoor",
+      target_role: "Global Compensation and Benefits Specialist / Reward Analyst",
+      overall_score: 5.1,
+      decision: "MAYBE",
+      file_name: "Meera_Kapoor_CV_Demo.pdf",
+      scores: {
+        skills_match: {
+          score: 5,
+          weight: 0.30,
+          justification: "Some HR generalist and employee engagement skills, but limited evidence of compensation analysis, benefits programmes or HRIS-based C&B reporting.",
+          evidence: "Demo CV states: 'handled HR generalist activities', 'employee engagement calendar', and 'onboarding coordination'."
+        },
+        relevant_experience: {
+          score: 5,
+          weight: 0.25,
+          justification: "The candidate has HR experience but it is not strongly focused on compensation and benefits. Experience level is relevant but domain match is weak.",
+          evidence: "Demo CV states: '2.5 years as HR Generalist' with limited C&B responsibilities."
+        },
+        education_certifications: {
+          score: 6,
+          weight: 0.15,
+          justification: "Relevant HR education, but no C&B or analytics certification is mentioned.",
+          evidence: "Demo CV states: 'Bachelor of Management Studies - HR'."
+        },
+        role_alignment: {
+          score: 5,
+          weight: 0.15,
+          justification: "Basic alignment with HR stakeholder management, but limited alignment with core C&B responsibilities such as salary planning, internal equity or market competitiveness.",
+          evidence: "Demo CV states: 'handled employee queries' and 'supported onboarding documentation'."
+        },
+        ownership_impact: {
+          score: 5,
+          weight: 0.15,
+          justification: "Some initiative shown in engagement activities, but limited measurable impact relevant to C&B.",
+          evidence: "Demo CV states: 'coordinated monthly engagement activities' but no quantified C&B outcome."
+        }
+      },
+      key_strengths: [
+        "Good HR generalist foundation",
+        "Employee communication and stakeholder handling experience",
+        "May be suitable for junior HR roles"
+      ],
+      red_flags: [
+        "Weak direct C&B experience",
+        "No salary planning, benchmarking, benefits renewal or HRIS C&B evidence"
+      ],
+      missing_requirements: [
+        "No compensation cycle management evidence",
+        "No strong quantitative compensation analysis evidence",
+        "No vendor or consultant relationship evidence"
+      ],
+      summary: "Meera has a relevant HR background but is not a strong match for this C&B-focused role. She may be suitable for broader HR generalist or HR operations roles, but the CV lacks enough direct compensation and benefits experience for a shortlist decision.",
+      confidence_level: "MEDIUM"
+    },
+    {
+      candidate_name: "Karan Shah",
+      target_role: "Global Compensation and Benefits Specialist / Reward Analyst",
+      overall_score: 3.4,
+      decision: "REJECT",
+      file_name: "Karan_Shah_CV_Demo.pdf",
+      scores: {
+        skills_match: {
+          score: 3,
+          weight: 0.30,
+          justification: "Low match. Candidate has recruitment and sourcing skills but little direct compensation, benefits, analytics or HRIS evidence relevant to the JD.",
+          evidence: "Demo CV states: 'IT recruiter', 'sourced candidates through LinkedIn', and 'scheduled interviews'."
+        },
+        relevant_experience: {
+          score: 3,
+          weight: 0.25,
+          justification: "Experience is mainly recruitment, not C&B. The JD requires 2-5 years in a global compensation and benefits role.",
+          evidence: "Demo CV states: '2 years Talent Acquisition Associate' and does not mention compensation or benefits ownership."
+        },
+        education_certifications: {
+          score: 5,
+          weight: 0.15,
+          justification: "Has a related business degree, but no reward, HR analytics or C&B-specific education is mentioned.",
+          evidence: "Demo CV states: 'BCom' and 'Recruitment Fundamentals Certificate'."
+        },
+        role_alignment: {
+          score: 3,
+          weight: 0.15,
+          justification: "Weak role alignment because the experience is TA-focused and does not match salary planning, bonus planning, benefits management or remuneration analysis.",
+          evidence: "Demo CV states: 'managed job postings and candidate pipelines'."
+        },
+        ownership_impact: {
+          score: 4,
+          weight: 0.15,
+          justification: "Some measurable recruitment delivery is present, but it is not relevant to C&B impact.",
+          evidence: "Demo CV states: 'closed 15 junior technology roles in 6 months'."
+        }
+      },
+      key_strengths: [
+        "Recruitment coordination experience",
+        "Candidate management and stakeholder communication",
+        "Some measurable TA delivery"
+      ],
+      red_flags: [
+        "No direct compensation and benefits experience",
+        "No salary benchmarking, benefits, HRIS or reward cycle evidence"
+      ],
+      missing_requirements: [
+        "Global C&B experience",
+        "Strong quantitative and analytical C&B skills",
+        "Compensation cycle management",
+        "Benefits programme knowledge"
+      ],
+      summary: "Karan is not a suitable match for this Reward Analyst / Global C&B Specialist role. The profile is recruitment-focused and lacks the core compensation, benefits, analytics and HRIS experience required by the JD.",
+      confidence_level: "HIGH"
+    }
+  ];
 
   if (window.pdfjsLib) {
     pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
@@ -851,6 +1130,16 @@ STRICT RULES:
     a.download = fileName;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+
+  function loadRewardAnalystDemo() {
+    document.getElementById("jobTitle").value = "Global Compensation and Benefits Specialist / Reward Analyst";
+    document.getElementById("jdText").value = `Demo JD: Global Compensation and Benefits Specialist / Reward Analyst\n\nLocation: Bangalore\nExperience: 2-5 years relevant experience\nQualification: Bachelor's degree in Human Resources, Business Administration or related field\n\nResponsibilities:\n- Support development and implementation of compensation and benefits programmes aligned to global strategy.\n- Ensure C&B programmes are competitive, compliant with local regulations and aligned with market trends.\n- Coordinate salary planning, bonus planning and new benefits introduction.\n- Participate in strategic C&B projects and initiatives.\n- Analyse remuneration components and prepare reports on internal equity and external competitiveness.\n- Develop and maintain relationships with external vendors and consultants.\n- Analyse C&B data to identify trends and recommend improvements.\n- Support annual C&B review process with accurate data management.\n- Communicate C&B programmes effectively and manage employee queries.\n\nRequirements:\n- Strong knowledge of compensation and benefits programmes, including non-payroll.\n- Strong quantitative and analytical skills.\n- Prior experience in HR practices and compensation cycle management.\n- Strong communication and interpersonal skills.\n- Experience working with HR information systems is a plus.`;
+    allResults = JSON.parse(JSON.stringify(rewardAnalystDemoResults));
+    allResults.sort((a, b) => Number(b.overall_score || 0) - Number(a.overall_score || 0));
+    renderResults();
+    setStatus("Reward Analyst demo loaded. This sample dataset uses your resume plus dummy candidate profiles, so you can show the project without calling the AI API.");
   }
 
   function clearAll() {

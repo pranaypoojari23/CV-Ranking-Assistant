@@ -35,6 +35,13 @@ This is a **front-end GitHub Pages demo**. Do **not** hardcode your API key into
 
 The app provides a runtime field where you can paste your API key. For a real production tool, move the API call to a backend or serverless function so the key is never exposed in the browser.
 
+
+## Demo Mode
+
+The app includes a **Load Reward Analyst Demo** button. This loads sample results for a Reward Analyst / Global Compensation and Benefits Specialist role using one real sample profile and multiple dummy candidate profiles.
+
+Use this mode when presenting the project on GitHub Pages so you can demonstrate the ranking, shortlisting, detailed scoring, CSV export and JSON export without repeatedly calling the AI API.
+
 ## How to Use
 
 1. Open `index.html`.
