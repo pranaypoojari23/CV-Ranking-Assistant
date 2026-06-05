@@ -7,7 +7,7 @@ A general-purpose AI recruitment screening demo that lets a user upload **one jo
 After enabling GitHub Pages, your live URL will look like:
 
 ```text
-[https://YOUR-USERNAME.github.io/YOUR-REPOSITORY-NAME/](https://pranaypoojari23.github.io/CV-Ranking-Assistant/)
+https://pranaypoojari23.github.io/CV-Ranking-Assistant
 ```
 
 ## What It Does
